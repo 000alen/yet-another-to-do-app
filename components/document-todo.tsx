@@ -140,11 +140,19 @@ const TodoPanel = ({
   todos,
   path = [],
   isRoot = false,
+  index,
+  initialWidth,
+  onWidthChange,
+  isLastPanel,
 }: {
   todo: Todo | null;
   todos: Todo[];
   path: string[];
   isRoot: boolean;
+  index: number;
+  initialWidth: number;
+  onWidthChange: (index: number, width: number) => void;
+  isLastPanel: boolean;
 }) => {
   const { setTodos, activePath, setActivePath } = React.useContext(Context)!;
 
@@ -152,8 +160,8 @@ const TodoPanel = ({
 
   // Width state and resizing logic
   const MIN_PANEL_WIDTH = 600;
-  const MAX_PANEL_WIDTH = 1000;
-  const [panelWidth, setPanelWidth] = React.useState(600);
+  const MAX_PANEL_WIDTH = 1200;
+  const [panelWidth, setPanelWidth] = React.useState(initialWidth);
 
   const handlePanelResize = (delta: number) => {
     setPanelWidth((prevWidth) => {
@@ -164,6 +172,11 @@ const TodoPanel = ({
       return newWidth;
     });
   };
+
+  // Report width changes to parent
+  React.useEffect(() => {
+    onWidthChange(index, panelWidth);
+  }, [panelWidth]);
 
   const addTodo = (parentPath: string[] = []) => {
     const newTodo: Todo = {
@@ -259,10 +272,7 @@ const TodoPanel = ({
   return (
     <div className="flex h-full">
       <div
-        className={cn(
-          "h-full flex flex-col bg-background border-r",
-          !isActive && "opacity-50"
-        )}
+        className={cn("h-full flex flex-col bg-white border")}
         style={{ width: `${panelWidth}px` }}
       >
         <Toolbar editor={editor} />
@@ -282,7 +292,10 @@ const TodoPanel = ({
                   </Button>
                 )}
               </div>
-              <EditorContent editor={editor} className="prose max-w-full" />
+              <EditorContent
+                editor={editor}
+                className="prose max-w-full outline-none"
+              />
             </>
           ) : (
             <div className="text-xl font-semibold mb-4">Todo List</div>
@@ -329,6 +342,39 @@ export function DocumentTodo() {
   const [todos, setTodos] = React.useState<Todo[]>([]);
   const [activePath, setActivePath] = React.useState<string[]>([]);
 
+  const [panelWidths, setPanelWidths] = React.useState<number[]>([]);
+  const [leftPadding, setLeftPadding] = React.useState(0);
+
+  React.useEffect(() => {
+    const totalPanels = activePath.length + 1;
+    setPanelWidths((currentWidths) => {
+      const newWidths = [...currentWidths];
+      while (newWidths.length < totalPanels) {
+        newWidths.push(400); // Default width for new panels
+      }
+      return newWidths.slice(0, totalPanels);
+    });
+  }, [activePath.length]);
+
+  // Calculate left padding to center the leftmost panel
+  React.useEffect(() => {
+    const totalWidth = panelWidths.reduce((a, b) => a + b, 0);
+    const viewportWidth = window.innerWidth;
+    if (totalWidth < viewportWidth) {
+      setLeftPadding((viewportWidth - totalWidth) / 2);
+    } else {
+      setLeftPadding(0);
+    }
+  }, [panelWidths]);
+
+  const handleWidthChange = (index: number, width: number) => {
+    setPanelWidths((prevWidths) => {
+      const newWidths = [...prevWidths];
+      newWidths[index] = width;
+      return newWidths;
+    });
+  };
+
   const getPanels = () => {
     const panels: JSX.Element[] = [];
     let currentTodos = todos;
@@ -354,6 +400,10 @@ export function DocumentTodo() {
           todos={i === 0 ? todos : todo?.children || []}
           path={path}
           isRoot={i === 0}
+          index={i}
+          initialWidth={panelWidths[i] || 600}
+          onWidthChange={handleWidthChange}
+          isLastPanel={i === activePath.length}
         />
       );
     }
@@ -363,9 +413,17 @@ export function DocumentTodo() {
 
   return (
     <Context.Provider value={{ todos, setTodos, activePath, setActivePath }}>
-      <div className="h-screen">
+      <div className="h-screen p-4 bg-slate-200">
         <ScrollArea className="h-full">
-          <div className="flex h-full">{getPanels()}</div>
+          <div
+            className="flex h-full gap-2"
+            style={{
+              width: `${panelWidths.reduce((a, b) => a + b, 0)}px`,
+              marginLeft: leftPadding > 0 ? `${leftPadding}px` : "0",
+            }}
+          >
+            {getPanels()}
+          </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
