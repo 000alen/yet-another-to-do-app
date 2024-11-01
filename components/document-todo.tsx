@@ -33,7 +33,7 @@ const Context = React.createContext<{
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
   activePath: string[];
   setActivePath: React.Dispatch<React.SetStateAction<string[]>>;
-} | null>(null);
+}>({ todos: [], setTodos: () => {}, activePath: [], setActivePath: () => {} });
 
 const Toolbar = ({ editor }: { editor: any }) => (
   <div className="flex items-center gap-1 px-2 border-b">
@@ -102,6 +102,39 @@ const Toolbar = ({ editor }: { editor: any }) => (
   </div>
 );
 
+const ResizeHandle = ({ onResize }: { onResize: (delta: number) => void }) => {
+  const startXRef = React.useRef<number>(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    startXRef.current = e.clientX;
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    const delta = e.clientX - startXRef.current;
+    onResize(delta);
+    startXRef.current = e.clientX; // Update the start position
+  };
+
+  const handleMouseUp = () => {
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  };
+
+  return (
+    <div
+      className="w-2 bg-muted hover:bg-muted-foreground/20 transition-colors cursor-col-resize"
+      onMouseDown={handleMouseDown}
+    >
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="w-0.5 h-8 bg-muted-foreground/30 rounded-full" />
+      </div>
+    </div>
+  );
+};
+
 const TodoPanel = ({
   todo,
   todos,
@@ -116,6 +149,21 @@ const TodoPanel = ({
   const { setTodos, activePath, setActivePath } = React.useContext(Context)!;
 
   const [newTodoTitle, setNewTodoTitle] = React.useState("");
+
+  // Width state and resizing logic
+  const MIN_PANEL_WIDTH = 600;
+  const MAX_PANEL_WIDTH = 1000;
+  const [panelWidth, setPanelWidth] = React.useState(600);
+
+  const handlePanelResize = (delta: number) => {
+    setPanelWidth((prevWidth) => {
+      const newWidth = Math.max(
+        MIN_PANEL_WIDTH,
+        Math.min(MAX_PANEL_WIDTH, prevWidth + delta)
+      );
+      return newWidth;
+    });
+  };
 
   const addTodo = (parentPath: string[] = []) => {
     const newTodo: Todo = {
@@ -209,66 +257,70 @@ const TodoPanel = ({
   });
 
   return (
-    <div
-      className={cn(
-        "min-w-[400px] max-w-[400px] border-r h-full flex flex-col bg-background",
-        !isActive && "opacity-50"
-      )}
-    >
-      <Toolbar editor={editor} />
-
-      <div className="flex-1 overflow-auto p-4">
-        {todo ? (
-          <>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">{todo.title}</h2>
-              {!isRoot && (
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => removeTodo(todo.id, path.slice(0, -1))}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-            <EditorContent editor={editor} className="prose max-w-full" />
-          </>
-        ) : (
-          <div className="text-xl font-semibold mb-4">Todo List</div>
+    <div className="flex h-full">
+      <div
+        className={cn(
+          "h-full flex flex-col bg-background border-r",
+          !isActive && "opacity-50"
         )}
+        style={{ width: `${panelWidth}px` }}
+      >
+        <Toolbar editor={editor} />
 
-        <div className="mt-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Input
-              placeholder="New document title"
-              value={newTodoTitle}
-              onChange={(e) => setNewTodoTitle(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  addTodo(path);
-                }
-              }}
-            />
-            <Button size="icon" onClick={() => addTodo(path)}>
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="flex-1 overflow-auto p-4">
+          {todo ? (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">{todo.title}</h2>
+                {!isRoot && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => removeTodo(todo.id, path.slice(0, -1))}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <EditorContent editor={editor} className="prose max-w-full" />
+            </>
+          ) : (
+            <div className="text-xl font-semibold mb-4">Todo List</div>
+          )}
 
-          <div className="space-y-1">
-            {todos.map((childTodo) => (
-              <Button
-                key={childTodo.id}
-                variant="ghost"
-                className="w-full justify-start font-normal"
-                onClick={() => setActivePath([...path, childTodo.id])}
-              >
-                {childTodo.title}
+          <div className="mt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Input
+                placeholder="New document title"
+                value={newTodoTitle}
+                onChange={(e) => setNewTodoTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    addTodo(path);
+                  }
+                }}
+              />
+              <Button size="icon" onClick={() => addTodo(path)}>
+                <Plus className="h-4 w-4" />
               </Button>
-            ))}
+            </div>
+
+            <div className="space-y-1">
+              {todos.map((childTodo) => (
+                <Button
+                  key={childTodo.id}
+                  variant="ghost"
+                  className="w-full justify-start font-normal"
+                  onClick={() => setActivePath([...path, childTodo.id])}
+                >
+                  {childTodo.title}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
+      <ResizeHandle onResize={handlePanelResize} />
     </div>
   );
 };
@@ -278,33 +330,32 @@ export function DocumentTodo() {
   const [activePath, setActivePath] = React.useState<string[]>([]);
 
   const getPanels = () => {
-    // const panels: JSX.Element[] = [TodoPanel(null, todos, [], true)];
-    const panels: JSX.Element[] = [
-      <TodoPanel
-        key="root"
-        todo={null}
-        todos={todos}
-        path={[]}
-        isRoot={true}
-      />,
-    ];
+    const panels: JSX.Element[] = [];
     let currentTodos = todos;
 
-    for (const id of activePath) {
-      const todo = currentTodos.find((t) => t.id === id);
-      if (todo) {
-        panels.push(
-          // TodoPanel(todo, todo.children, activePath.slice(0, panels.length))
-          <TodoPanel
-            key={todo.id}
-            todo={todo}
-            todos={todo.children}
-            path={activePath.slice(0, panels.length)}
-            isRoot={false}
-          />
-        );
-        currentTodos = todo.children;
+    for (let i = 0; i <= activePath.length; i++) {
+      let todo: Todo | null = null;
+      let path = activePath.slice(0, i);
+
+      if (i > 0) {
+        const id = activePath[i - 1];
+        todo = currentTodos.find((t) => t.id === id) || null;
+        if (todo) {
+          currentTodos = todo.children;
+        } else {
+          break;
+        }
       }
+
+      panels.push(
+        <TodoPanel
+          key={i === 0 ? "root" : todo?.id || `panel-${i}`}
+          todo={i === 0 ? null : todo}
+          todos={i === 0 ? todos : todo?.children || []}
+          path={path}
+          isRoot={i === 0}
+        />
+      );
     }
 
     return panels;
@@ -313,10 +364,8 @@ export function DocumentTodo() {
   return (
     <Context.Provider value={{ todos, setTodos, activePath, setActivePath }}>
       <div className="h-screen">
-        <ScrollArea className="h-full whitespace-nowrap">
-          <div className="flex h-full justify-start md:justify-center">
-            {getPanels()}
-          </div>
+        <ScrollArea className="h-full">
+          <div className="flex h-full">{getPanels()}</div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
