@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 type Params = Promise<{ orgId: string, todoId: string }>;
 
 export const GET = async (req: Request, { params }: { params: Params }) => {
