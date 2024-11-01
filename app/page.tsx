@@ -1,5 +1,13 @@
-import { DocumentTodo } from "@/components/to-do-page";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function Home() {
-  return <DocumentTodo />;
+export default async function Page() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) return redirect("/auth");
+
+  return redirect("/orgs");
 }

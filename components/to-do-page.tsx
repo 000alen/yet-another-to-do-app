@@ -337,7 +337,7 @@ const TodoPanel = ({
   );
 };
 
-export function DocumentTodo() {
+export function ToDoPage() {
   const [todos, setTodos] = React.useState<Todo[]>([]);
   const [activePath, setActivePath] = React.useState<string[]>([]);
 
