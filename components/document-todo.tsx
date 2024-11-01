@@ -35,6 +35,7 @@ const Context = React.createContext<{
   setActivePath: React.Dispatch<React.SetStateAction<string[]>>;
 }>({ todos: [], setTodos: () => {}, activePath: [], setActivePath: () => {} });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Toolbar = ({ editor }: { editor: any }) => (
   <div className="flex items-center gap-1 px-2 border-b">
     <Button
@@ -143,7 +144,6 @@ const TodoPanel = ({
   index,
   initialWidth,
   onWidthChange,
-  isLastPanel,
 }: {
   todo: Todo | null;
   todos: Todo[];
@@ -152,7 +152,6 @@ const TodoPanel = ({
   index: number;
   initialWidth: number;
   onWidthChange: (index: number, width: number) => void;
-  isLastPanel: boolean;
 }) => {
   const { setTodos, activePath, setActivePath } = React.useContext(Context)!;
 
@@ -176,7 +175,7 @@ const TodoPanel = ({
   // Report width changes to parent
   React.useEffect(() => {
     onWidthChange(index, panelWidth);
-  }, [panelWidth]);
+  }, [index, onWidthChange, panelWidth]);
 
   const addTodo = (parentPath: string[] = []) => {
     const newTodo: Todo = {
@@ -255,9 +254,9 @@ const TodoPanel = ({
     });
   };
 
-  const isActive =
-    path.length === activePath.length &&
-    path.every((id, i) => activePath[i] === id);
+  // const isActive =
+  //   path.length === activePath.length &&
+  //   path.every((id, i) => activePath[i] === id);
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -381,7 +380,7 @@ export function DocumentTodo() {
 
     for (let i = 0; i <= activePath.length; i++) {
       let todo: Todo | null = null;
-      let path = activePath.slice(0, i);
+      const path = activePath.slice(0, i);
 
       if (i > 0) {
         const id = activePath[i - 1];
@@ -403,7 +402,6 @@ export function DocumentTodo() {
           index={i}
           initialWidth={panelWidths[i] || 600}
           onWidthChange={handleWidthChange}
-          isLastPanel={i === activePath.length}
         />
       );
     }
