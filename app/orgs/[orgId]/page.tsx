@@ -1,5 +1,5 @@
 import { ToDoPage } from "@/components/to-do-page";
-import { createAsyncCaller } from "@/trpc/routers/_app";
+// import { createAsyncCaller } from "@/trpc/routers/_app";
 
 export default async function Page({
   params,
@@ -7,9 +7,7 @@ export default async function Page({
   params: Promise<{ orgId: string }>;
 }) {
   const { orgId } = await params;
+  // const trpc = await createAsyncCaller();
 
-  const trpc = await createAsyncCaller();
-  const todos = await trpc.getTodos({ orgId });
-
-  return <ToDoPage todos={todos} />;
+  return <ToDoPage orgId={orgId} />;
 }

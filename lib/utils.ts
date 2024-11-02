@@ -25,3 +25,17 @@ export function slugify(input: string): string {
 
   return normalized;
 }
+
+export function randomId() {
+  return Math.random().toString(36).slice(2);
+}
+
+export function getBaseUrl() {
+  const url =
+    process.env.NEXT_PUBLIC_APP_DOMAIN &&
+      !process.env.NEXT_PUBLIC_APP_DOMAIN.includes("localhost")
+      ? `https://www.${process.env.NEXT_PUBLIC_APP_DOMAIN}/`
+      : "http://localhost:3000/";
+
+  return url;
+}

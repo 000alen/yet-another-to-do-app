@@ -5,10 +5,12 @@ import { db } from "@/db";
 import { Resend } from "resend";
 import * as schema from "@/db/schema";
 import * as authSchema from "../auth-schema";
+import { getBaseUrl } from "./utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const auth = betterAuth({
+  baseURL: getBaseUrl(),
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {

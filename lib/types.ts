@@ -6,7 +6,7 @@ export const Todo = z.object({
   organizationId: z.string().nullable(),
   parentId: z.string().nullable(),
   title: z.string(),
-  content: z.any(),
+  content: z.unknown(),
   status: z.enum(["open", "in_progress", "completed", "archived"]),
   dueAt: z.date().nullable(),
   priority: z.enum(["low", "medium", "high"]).nullable(),

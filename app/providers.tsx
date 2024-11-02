@@ -37,6 +37,8 @@ export default function TRPCProvider({
               credentials: "include",
             });
           },
+          // @ts-expect-error WTF trpc types
+          transformer: superjson,
         }),
       ],
       transformer: superjson,

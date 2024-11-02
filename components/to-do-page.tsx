@@ -4,19 +4,19 @@ import * as React from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Todo } from "@/lib/types";
 import { TodoPanel } from "@/components/to-do-panel";
-import { RootToDoList } from "./root-to-do-list";
+import { RootToDoList } from "./root-to-do-panel";
 
 type PathAction =
   | { type: "push"; atTodoId: string | null; todo: Todo }
   | { type: "pop"; todoId: string };
 
 export const Context = React.createContext<{
-  rootTodos: Todo[];
+  orgId: string;
   path: Todo[];
   dispatch: React.Dispatch<PathAction>;
-}>({ rootTodos: [], path: [], dispatch: () => {} });
+}>({ orgId: "", path: [], dispatch: () => {} });
 
-export function ToDoPage({ todos }: { todos: Todo[] }) {
+export function ToDoPage({ orgId }: { orgId: string }) {
   const [path, dispatch] = React.useReducer(
     (path: Todo[], action: PathAction) => {
       let index;
@@ -63,8 +63,8 @@ export function ToDoPage({ todos }: { todos: Todo[] }) {
   // }, [panelWidths]);
 
   const context = React.useMemo(
-    () => ({ rootTodos: todos, path, dispatch }),
-    [todos, path]
+    () => ({ orgId, path, dispatch }),
+    [orgId, path]
   );
 
   return (
@@ -78,7 +78,7 @@ export function ToDoPage({ todos }: { todos: Todo[] }) {
             //   marginLeft: leftPadding > 0 ? `${leftPadding}px` : "0",
             // }}
           >
-            <RootToDoList key="root" todos={todos} />
+            <RootToDoList key="root" />
 
             {path.map((todo) => (
               <TodoPanel key={todo.id} todo={todo} />
