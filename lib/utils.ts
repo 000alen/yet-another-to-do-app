@@ -34,8 +34,8 @@ export function getBaseUrl() {
   const url =
     process.env.NEXT_PUBLIC_APP_DOMAIN &&
       !process.env.NEXT_PUBLIC_APP_DOMAIN.includes("localhost")
-      ? `https://${process.env.NEXT_PUBLIC_APP_DOMAIN}/`
-      : "http://localhost:3000/";
+      ? `https://${process.env.NEXT_PUBLIC_APP_DOMAIN}`
+      : "http://localhost:3000";
 
   return url;
 }
