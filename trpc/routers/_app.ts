@@ -4,8 +4,9 @@ import { createContext } from "@/trpc/context";
 import authProcedure from "../procedures/auth";
 import { z } from "zod";
 import { db } from "@/db";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, gt, isNull } from "drizzle-orm";
 import { todo } from "@/db/schema";
+import { invitation } from "@/auth-schema";
 
 export const appRouter = router({
   getTodos: authProcedure.input(z.object({
@@ -56,6 +57,26 @@ export const appRouter = router({
   })).mutation(async ({ input: { todoId, todo: data } }) => {
     const updatedTodo = await db.update(todo).set(data as any).where(eq(todo.id, todoId));
     return updatedTodo;
+  }),
+
+  getInvitations: authProcedure.input(z.object({
+    userId: z.string()
+  })).query(async ({
+    ctx
+  }) => {
+    const { email } = ctx.session.user;
+    const data = await db
+      .select()
+      .from(invitation)
+      .where(
+        and(
+          gt(invitation.expiresAt, new Date()),
+          eq(invitation.status, "pending"),
+          eq(invitation.email, email),
+        )
+      );
+
+    return data;
   })
 });
 

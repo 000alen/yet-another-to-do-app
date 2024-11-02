@@ -31,9 +31,9 @@ export function randomId() {
 }
 
 export function getBaseUrl() {
+  const isDev = process.env.NODE_ENV === "development";
   const url =
-    process.env.NEXT_PUBLIC_APP_DOMAIN &&
-      !process.env.NEXT_PUBLIC_APP_DOMAIN.includes("localhost")
+    process.env.NEXT_PUBLIC_APP_DOMAIN && !isDev
       ? `https://${process.env.NEXT_PUBLIC_APP_DOMAIN}`
       : "http://localhost:3000";
 

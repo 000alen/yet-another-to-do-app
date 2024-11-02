@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import * as React from "react";
@@ -7,9 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { slugify } from "@/lib/utils";
 import Link from "next/link";
+import { trpc } from "@/lib/trpc-client";
+import { skipToken } from "@tanstack/react-query";
 
 export default function OrgsPage() {
+  const { data: session } = authClient.useSession();
   const { data: organizations } = authClient.useListOrganizations();
+  const { data: invitations } = trpc.getInvitations.useQuery(
+    !!session ? { userId: session?.user.id ?? "" } : skipToken,
+    {
+      placeholderData: [],
+    }
+  );
+
   const [newOrgName, setNewOrgName] = React.useState("");
   const [isCreating, setIsCreating] = React.useState(false);
 
@@ -70,6 +81,20 @@ export default function OrgsPage() {
           </Button>
         </DialogContent>
       </Dialog>
+
+      <h1 className="text-2xl font-bold mb-4">Your Invitations</h1>
+      {invitations && invitations.length > 0 ? (
+        <ul className="mb-4">
+          {invitations?.map((invitation) => (
+            <OrgInvitationListItem
+              key={invitation.id}
+              invitation={invitation}
+            />
+          ))}
+        </ul>
+      ) : (
+        <p className="mb-4">You have no invitations.</p>
+      )}
     </div>
   );
 }
@@ -128,6 +153,37 @@ function OrgListItem({ org }: { org: { id: string; name: string } }) {
           </Button>
         </DialogContent>
       </Dialog>
+    </li>
+  );
+}
+
+function OrgInvitationListItem({ invitation }: { invitation: any }) {
+  return (
+    <li className="mb-2 flex items-center justify-between">
+      <div>
+        {invitation.organizationId} ({invitation.role})
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          onClick={() => {
+            authClient.organization.acceptInvitation({
+              invitationId: invitation.id,
+            });
+          }}
+        >
+          accept
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            authClient.organization.rejectInvitation({
+              invitationId: invitation.id,
+            });
+          }}
+        >
+          reject
+        </Button>
+      </div>
     </li>
   );
 }

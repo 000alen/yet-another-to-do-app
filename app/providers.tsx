@@ -17,10 +17,11 @@ export default function TRPCProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const isDev = process.env.NODE_ENV === "development";
+
   // NOTE: Your production URL environment variable may be different
   const url =
-    process.env.NEXT_PUBLIC_APP_DOMAIN &&
-    !process.env.NEXT_PUBLIC_APP_DOMAIN.includes("localhost")
+    process.env.NEXT_PUBLIC_APP_DOMAIN && !isDev
       ? `https://${process.env.NEXT_PUBLIC_APP_DOMAIN}/api/trpc/`
       : "http://localhost:3000/api/trpc/";
 
