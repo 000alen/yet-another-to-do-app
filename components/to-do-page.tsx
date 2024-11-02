@@ -37,31 +37,6 @@ export function ToDoPage({ orgId }: { orgId: string }) {
     []
   );
 
-  // const [panelWidths, setPanelWidths] = React.useState<number[]>([]);
-  // const [leftPadding, setLeftPadding] = React.useState(0);
-
-  // React.useEffect(() => {
-  //   const totalPanels = path.length + 1;
-  //   setPanelWidths((currentWidths) => {
-  //     const newWidths = [...currentWidths];
-  //     while (newWidths.length < totalPanels) {
-  //       newWidths.push(400); // Default width for new panels
-  //     }
-  //     return newWidths.slice(0, totalPanels);
-  //   });
-  // }, [path.length]);
-
-  // // Calculate left padding to center the leftmost panel
-  // React.useEffect(() => {
-  //   const totalWidth = panelWidths.reduce((a, b) => a + b, 0);
-  //   const viewportWidth = window.innerWidth;
-  //   if (totalWidth < viewportWidth) {
-  //     setLeftPadding((viewportWidth - totalWidth) / 2);
-  //   } else {
-  //     setLeftPadding(0);
-  //   }
-  // }, [panelWidths]);
-
   const context = React.useMemo(
     () => ({ orgId, path, dispatch }),
     [orgId, path]
@@ -71,13 +46,7 @@ export function ToDoPage({ orgId }: { orgId: string }) {
     <Context.Provider value={context}>
       <div className="h-screen p-4 bg-slate-200">
         <ScrollArea className="h-full">
-          <div
-            className="flex h-full gap-2"
-            // style={{
-            //   width: `${panelWidths.reduce((a, b) => a + b, 0)}px`,
-            //   marginLeft: leftPadding > 0 ? `${leftPadding}px` : "0",
-            // }}
-          >
+          <div className="flex h-full gap-2">
             <RootToDoList key="root" />
 
             {path.map((todo) => (

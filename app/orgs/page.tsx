@@ -10,6 +10,7 @@ import { slugify } from "@/lib/utils";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc-client";
 import { skipToken } from "@tanstack/react-query";
+import { Invitation } from "@/lib/types";
 
 export default function OrgsPage() {
   const { data: session } = authClient.useSession();
@@ -157,30 +158,27 @@ function OrgListItem({ org }: { org: { id: string; name: string } }) {
   );
 }
 
-function OrgInvitationListItem({ invitation }: { invitation: any }) {
+function OrgInvitationListItem({ invitation }: { invitation: Invitation }) {
+  const accept = async () => {
+    authClient.organization.acceptInvitation({
+      invitationId: invitation.id,
+    });
+  };
+
+  const reject = async () => {
+    authClient.organization.rejectInvitation({
+      invitationId: invitation.id,
+    });
+  };
+
   return (
     <li className="mb-2 flex items-center justify-between">
       <div>
-        {invitation.organizationId} ({invitation.role})
+        {invitation.organizationName} ({invitation.role})
       </div>
       <div className="flex items-center gap-2">
-        <Button
-          onClick={() => {
-            authClient.organization.acceptInvitation({
-              invitationId: invitation.id,
-            });
-          }}
-        >
-          accept
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            authClient.organization.rejectInvitation({
-              invitationId: invitation.id,
-            });
-          }}
-        >
+        <Button onClick={accept}>accept</Button>
+        <Button variant="secondary" onClick={reject}>
           reject
         </Button>
       </div>

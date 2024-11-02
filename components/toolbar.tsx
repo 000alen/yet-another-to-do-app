@@ -6,8 +6,6 @@ import {
   Link as LinkIcon,
   List,
   ListOrdered,
-  Maximize2,
-  Minimize2,
   Save,
   Type,
 } from "lucide-react";
@@ -82,29 +80,23 @@ export const Toolbar = ({
       >
         <LinkIcon className="h-4 w-4" />
       </Button>
-      <Separator orientation="vertical" className="mx-1 h-6" />
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => {
-          mutate({
-            orgId,
-            todoId,
-            todo: {
-              content: editor.getJSON(),
-            } as any,
-          });
-        }}
-      >
-        <Save className="h-4 w-4" />
-      </Button>
+
       <div className="ml-auto flex items-center gap-1">
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Minimize2 className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Maximize2 className="h-4 w-4" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => {
+            mutate({
+              orgId,
+              todoId,
+              todo: {
+                content: editor.getJSON(),
+              } as any,
+            });
+          }}
+        >
+          <Save className="h-4 w-4" />
         </Button>
       </div>
     </div>

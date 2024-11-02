@@ -39,6 +39,11 @@ export const TodoPanel = ({
   const editor = useEditor({
     extensions: [StarterKit],
     content: todo ? (todo.content as Content) : "",
+    editorProps: {
+      attributes: {
+        class: "focus:outline-none",
+      },
+    },
   });
 
   return (
@@ -65,10 +70,7 @@ export const TodoPanel = ({
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <EditorContent
-            editor={editor}
-            className="prose max-w-full outline-none"
-          />
+          <EditorContent editor={editor} className="prose max-w-full" />
 
           <ChildrenToDoList todoId={todo.id} />
         </div>

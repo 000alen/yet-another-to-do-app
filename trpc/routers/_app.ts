@@ -6,7 +6,8 @@ import { z } from "zod";
 import { db } from "@/db";
 import { and, eq, gt, isNull } from "drizzle-orm";
 import { todo } from "@/db/schema";
-import { invitation } from "@/auth-schema";
+import { invitation, organization, user } from "@/auth-schema";
+import { Invitation } from "@/lib/types";
 
 export const appRouter = router({
   getTodos: authProcedure.input(z.object({
@@ -61,13 +62,23 @@ export const appRouter = router({
 
   getInvitations: authProcedure.input(z.object({
     userId: z.string()
-  })).query(async ({
+  })).output(Invitation.array()).query(async ({
     ctx
   }) => {
     const { email } = ctx.session.user;
     const data = await db
-      .select()
+      .select({
+        id: invitation.id,
+        role: invitation.role,
+        expiresAt: invitation.expiresAt,
+        inviterId: invitation.inviterId,
+        inviterName: user.name,
+        organizationId: invitation.organizationId,
+        organizationName: organization.name
+      })
       .from(invitation)
+      .leftJoin(organization, eq(organization.id, invitation.organizationId))
+      .leftJoin(user, eq(user.id, invitation.inviterId))
       .where(
         and(
           gt(invitation.expiresAt, new Date()),

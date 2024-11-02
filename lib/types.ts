@@ -16,3 +16,15 @@ export const Todo = z.object({
 });
 
 export type Todo = z.infer<typeof Todo>;
+
+export const Invitation = z.object({
+  id: z.string(),
+  role: z.string().nullable(),
+  expiresAt: z.date(),
+  inviterId: z.string(),
+  inviterName: z.string().nullable(),
+  organizationId: z.string(),
+  organizationName: z.string().nullable(),
+});
+
+export type Invitation = z.infer<typeof Invitation>;
