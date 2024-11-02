@@ -18,7 +18,7 @@ export const ChildrenToDoList = ({ todoId }: { todoId?: string }) => {
       todoId,
     },
     {
-      queryKey: ["getTodos", { orgId, todoId }],
+      // queryKey: ["getTodos", { orgId, todoId }],
       placeholderData: [],
     }
   );
