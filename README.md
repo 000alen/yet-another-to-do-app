@@ -48,19 +48,25 @@ The project follows a structured directory layout:
 └── auth-schema.ts
 ```
 
+## Important Logic Location
+
+- **Authentication Logic:** The authentication logic is primarily handled in `lib/auth.ts`, which configures Better Auth with the necessary adapters and plugins.
+- **Database Interactions:** The database schema and ORM configuration can be found in `db/schema.ts` and `db/index.ts`, respectively. Here, Drizzle ORM manages the PostgreSQL database interactions.
+- **TRPC Router Logic:** The core API logic using TRPC is located in `trpc/routers/_app.ts`. This file contains the router that defines all the procedures for fetching and manipulating todos, organizations, and invitations. The authorization checks and data fetching are all managed here, ensuring that only authorized users can access their respective data.
+
 ## Installation
 
 1. **Clone the repository:**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/000alen/yet-another-to-do-app.git
    cd yet-another-to-do-app
    ```
 
 2. **Install dependencies:**
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Setup Environment Variables:**
@@ -78,7 +84,7 @@ The project follows a structured directory layout:
 5. **Start the development server:**
 
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 6. **Open your browser and navigate to:**
@@ -107,20 +113,24 @@ The project follows a structured directory layout:
 
 ## API Reference
 
-The API endpoints for handling authentication, organization management, and task management are located under the `app/api` directory, following the Next.js routing conventions.
+The application uses **TRPC** for its API routes, which enables type-safe communication between the frontend and backend. The key endpoints are defined in `trpc/routers/_app.ts`.
 
-### Example API Endpoints
+### Example TRPC Endpoints
 
-- **Authentication**
-  - `POST /api/auth` - Login and Signup endpoints managed by Better Auth.
-- **Organizations**
+- **getTodos**
 
-  - `GET /api/orgs/[orgId]` - Fetch organization details.
-  - `POST /api/orgs` - Create a new organization.
+  - Fetches all todos for a specified organization, with optional filtering by parent todo.
 
-- **Todos**
-  - `GET /api/orgs/[orgId]/todos` - Get all todos for an organization.
-  - `POST /api/orgs/[orgId]/todos` - Create a new todo.
+- **createTodo**
+
+  - Creates a new todo within a specified organization.
+
+- **updateTodo**
+
+  - Updates an existing todo by ID.
+
+- **deleteTodo**
+  - Deletes a todo by ID.
 
 ## Acknowledgements
 

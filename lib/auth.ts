@@ -10,10 +10,13 @@ import { member } from "../auth-schema";
 import { and, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
+// Initialize Resend email service with API key
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Configure authentication system
 export const auth = betterAuth({
   baseURL: getBaseUrl(),
+  // Set up database adapter with PostgreSQL and schema
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
@@ -21,13 +24,17 @@ export const auth = betterAuth({
       ...authSchema,
     }
   }),
+  // Enable email and password authentication
   emailAndPassword: {
     enabled: true,
   },
+  // Configure organization plugin with email invitation functionality
   plugins: [organization({
     async sendInvitationEmail(data) {
+      // Generate invitation link
       const inviteLink = `https://yet-another-to-do-app.vercel.app/orgs/invitations/${data.id}`
 
+      // Send invitation email using Resend
       await resend.emails.send({
         from: 'Acme <onboarding@resend.dev>',
         to: [data.email],
@@ -39,6 +46,12 @@ export const auth = betterAuth({
   )],
 });
 
+/**
+ * Verifies if a user is a member of a specific organization
+ * @param userId - The ID of the user to check
+ * @param orgId - The ID of the organization
+ * @throws {TRPCError} If user is not a member of the organization
+ */
 export const ensureUserIsMember = async (userId: string, orgId: string) => {
   const membership = await db.select().from(member).where(
     and(
