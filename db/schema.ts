@@ -24,6 +24,22 @@ export const todoPriorityEnum = pgEnum("todo_priority", [
   "high",
 ]);
 
+/**
+ * Represents the database schema for a todo item in the application.
+ * @table todo
+ * @property {UUID} id - Unique identifier for the todo item, auto-generated
+ * @property {string} userId - Foreign key reference to the user who created the todo
+ * @property {string} [organizationId] - Optional foreign key reference to the organization
+ * @property {UUID} [parentId] - Optional self-referential foreign key to parent todo item
+ * @property {string} title - The title of the todo item
+ * @property {JSON} content - Rich content of the todo item stored as JSONB
+ * @property {TodoStatus} status - Current status of the todo item (defaults to "open")
+ * @property {Date} [dueAt] - Optional due date and time for the todo item
+ * @property {TodoPriority} priority - Priority level of the todo item (defaults to "medium")
+ * @property {Date} createdAt - Timestamp of when the todo was created
+ * @property {Date} updatedAt - Timestamp of the last update
+ * @property {number} version - Version number for optimistic concurrency control (defaults to 1)
+ */
 export const todo = pgTable("todo", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("userId")
@@ -45,10 +61,3 @@ export const todo = pgTable("todo", {
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
   version: integer("version").notNull().default(1),
 });
-
-// Indexes for performance
-// export const todoUserIdIdx = index("todo_user_id_idx").on(todo.userId);
-// export const todoOrganizationIdIdx = index("todo_organization_id_idx").on(
-//   todo.organizationId
-// );
-// export const todoParentIdIdx = index("todo_parent_id_idx").on(todo.parentId);
