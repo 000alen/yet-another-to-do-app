@@ -6,6 +6,9 @@ import { Resend } from "resend";
 import * as schema from "@/db/schema";
 import * as authSchema from "../auth-schema";
 import { getBaseUrl } from "./utils";
+import { member } from "../auth-schema";
+import { and, eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -35,3 +38,18 @@ export const auth = betterAuth({
   }
   )],
 });
+
+export const ensureUserIsMember = async (userId: string, orgId: string) => {
+  const membership = await db.select().from(member).where(
+    and(
+      eq(member.userId, userId),
+      eq(member.organizationId, orgId)
+    )).limit(1);
+
+  if (membership.length === 0) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "You are not a member of this organization.",
+    });
+  }
+};

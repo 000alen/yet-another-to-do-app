@@ -8,6 +8,7 @@ import {
   ListOrdered,
   Save,
   Type,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -21,7 +22,7 @@ export const Toolbar = ({
   todoId: string;
   editor: any;
 }) => {
-  const { orgId } = React.useContext(Context);
+  const { orgId, dispatch } = React.useContext(Context);
   const { mutate } = trpc.updateTodo.useMutation();
 
   return (
@@ -97,6 +98,19 @@ export const Toolbar = ({
           }}
         >
           <Save className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() =>
+            dispatch({
+              type: "pop",
+              todoId,
+            })
+          }
+        >
+          <X className="h-4 w-4" />
         </Button>
       </div>
     </div>
